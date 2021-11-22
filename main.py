@@ -1,11 +1,11 @@
 from oaipmh.client import Client
 from oaipmh.metadata import MetadataRegistry, oai_dc_reader
-
+from datetime import datetime
 import metaCrawler as meta
 
 def get_records():
 
-    meta.get_records()
+    meta.get_records(datetime.now(),datetime.now())
     ## URL = 'http://export.arxiv.org/oai2'
 
     #registry = MetadataRegistry()

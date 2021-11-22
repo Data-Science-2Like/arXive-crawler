@@ -68,4 +68,5 @@ def insertPaper(identifier, title, authors, subjects, datetime, url):
 
     print('inserted record with id ', identifier)
 
+def commit():
     conn.commit()
