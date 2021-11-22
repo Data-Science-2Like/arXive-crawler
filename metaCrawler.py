@@ -13,10 +13,12 @@ def get_records(von, bis):
     client = Client(URL, registry)
 
     initDatabase()
-
+    count = 0
     for (id,meta,_) in client.listRecords(metadataPrefix='oai_dc', set='cs'):
+        count += 1
         insertPaper(str(meta.getField('identifier')[0]).split('/')[-1].replace('.',''),meta.getField('title'),meta.getField('creator'), meta.getField('subject'), meta.getField('date'), meta.getField('identifier'))
-
+        if count % 100 == 0:
+            commit()
     commit()
     # for record in client.listRecords(metadataPrefix='oai_dc'):
     #     print(record)
