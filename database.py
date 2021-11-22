@@ -13,11 +13,11 @@ def initDatabase():
     );
     CREATE TABLE IF NOT EXISTS subjects (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-    name TEXT
+    name TEXT UNIQUE
     );
     CREATE TABLE IF NOT EXISTS authors (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-    name TEXT
+    name TEXT UNIQUE
     );
     CREATE TABLE IF NOT EXISTS published (
     paperID INTEGER,
@@ -34,6 +34,8 @@ def initDatabase():
     FOREIGN KEY (subjectID) REFERENCES subjects(id)
     );
     ''')
+
+
 
 def insertPaper(identifier, title, authors, subjects, datetime, url):
     cur = conn.cursor()
@@ -65,4 +67,5 @@ def insertPaper(identifier, title, authors, subjects, datetime, url):
         cur.execute('INSERT OR IGNORE INTO tagged VALUES (?,?)',(identifier,subjectId))
 
     print('inserted record with id ', identifier)
+
     conn.commit()
