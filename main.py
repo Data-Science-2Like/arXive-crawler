@@ -2,6 +2,7 @@ from oaipmh.client import Client
 from oaipmh.metadata import MetadataRegistry, oai_dc_reader
 from datetime import datetime
 import metaCrawler as meta
+import dataCrawler as data
 
 def get_records():
 
@@ -19,5 +20,9 @@ def get_records():
     # for record in client.listRecords(metadataPrefix='oai_dc'):
     #     print(record)
 
+def get_data():
+    data.getData("C:\\Users\\Simon\\Desktop\\test")
+
+
 if __name__ == '__main__':
-    get_records()
+    get_data()

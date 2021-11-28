@@ -68,5 +68,16 @@ def insertPaper(identifier, title, authors, subjects, datetime, url):
 
     print('inserted record with id ', identifier)
 
+def getPaperUrls() :
+
+    cur = conn.cursor()
+    cur.execute('''SELECT id, title, url, datetime FROM papers''')
+
+    result = cur.fetchall()
+
+    return result
+
+
+
 def commit():
     conn.commit()
