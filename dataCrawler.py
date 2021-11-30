@@ -3,7 +3,7 @@ import os
 import io
 import requests
 from os import path
-import pyfsig as sig
+
 
 from database import initDatabase,getPaperUrls, commit
 
@@ -35,6 +35,15 @@ def getData(dest):
             time.sleep(1)
 
 
+def checkSignature(buffer):
+    # guess the filetype based on the beginning of the buffer
+    tarSig = bytearray([0x1F,0x8B,0x08, 0x08])
+    if tarSig == buffer :
+        return '.tar.gz'
+    else:
+        return '.pdf'
+
+
 def downloadPaper(dest,url, identifier):
 
     #rawPage = requests.get(url)
@@ -45,15 +54,14 @@ def downloadPaper(dest,url, identifier):
 
     data = requests.get(url, allow_redirects=True)
 
-    fileType = sig.get_from_file(io.BytesIO(data.content))
-
     # fileType = magic.from_buffer(data, mime=True)
     # print(fileType)
     # libmagic for windows not so easy :(
 
+    ext = checkSignature(data.content[0:4])
 
-
-
-    savePath = os.path.join(dest, str(identifier) + ".tar.gz")
+    savePath = os.path.join(dest, str(identifier) + ext)
     open(savePath, 'wb').write(data.content)
+
+
 
