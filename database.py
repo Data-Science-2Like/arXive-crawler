@@ -77,7 +77,22 @@ def getPaperUrls(startingId = 0) :
 
     return result
 
+def getPaperUrlsByCategory(categories,startingId = 0):
+    cur = conn.cursor()
 
+    # becase python, we first need to convert all ints to str
+    converted = [str(element) for element in categories]
+
+    categoriesStr = ",".join(converted)
+    cur.execute('''SELECT DISTINCT id, title, url, datetime FROM papers
+    INNER JOIN tagged ON papers.id = tagged.paperID
+    WHERE papers.id >= ? AND tagged.subjectID IN(''' + categoriesStr + ')', (startingId,))
+    # we need to add the categories string manually because passing it as a parameter doesn't work somehow
+
+
+    result = cur.fetchall()
+
+    return result
 
 def commit():
     conn.commit()

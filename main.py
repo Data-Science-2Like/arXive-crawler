@@ -21,7 +21,7 @@ def get_records():
     #     print(record)
 
 def get_data():
-    data.getData("C:\\Users\\Simon\\Desktop\\test")
+    data.getData("C:\\Users\\Simon\\Desktop\\ai_papers")
 
 
 if __name__ == '__main__':

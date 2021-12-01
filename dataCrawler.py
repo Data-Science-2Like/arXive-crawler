@@ -3,9 +3,9 @@ import os
 import io
 import requests
 from os import path
+from counter import Counter
 
-
-from database import initDatabase,getPaperUrls, commit
+from database import initDatabase,getPaperUrls, commit, getPaperUrlsByCategory
 
 exportUrl = "export.arxiv.org"
 burstSize = 4
@@ -20,7 +20,9 @@ def getData(dest):
     if not path.exists(dest):
         os.mkdir(dest)
 
-    metaData = getPaperUrls(7092016)
+    paperCounter = Counter("Crawled {0} papers this minute.")
+
+    metaData = getPaperUrlsByCategory([10,62,122],200000000)
     requestCount = 0
     try:
         for record in metaData:
@@ -31,10 +33,12 @@ def getData(dest):
             # print(url)
             downloadPaper(dest, url, record[0])
 
+            paperCounter.increment()
+
             if requestCount % burstSize == 0:
                 time.sleep(1)
     except BaseException as err:
-        print("Error oucurred after ", requestCount, " requests")
+        print("Error oucurred after ", requestCount, " requests with burstSize: ", burstSize, " and sleepLength: ", sleepLength)
         raise
 
 
@@ -55,7 +59,7 @@ def downloadPaper(dest,url, identifier):
         if data.status_code == 403:
             print("Seems like we got blocked :(")
         raise Exception(str("Error ") + str(data.status_code))
-    
+
     # fileType = magic.from_buffer(data, mime=True)
     # print(fileType)
     # libmagic for windows not so easy :(
