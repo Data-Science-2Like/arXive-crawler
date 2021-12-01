@@ -68,10 +68,10 @@ def insertPaper(identifier, title, authors, subjects, datetime, url):
 
     print('inserted record with id ', identifier)
 
-def getPaperUrls() :
+def getPaperUrls(startingId = 0) :
 
     cur = conn.cursor()
-    cur.execute('''SELECT id, title, url, datetime FROM papers''')
+    cur.execute('''SELECT id, title, url, datetime FROM papers WHERE id >= ?''', (startingId,))
 
     result = cur.fetchall()
 
