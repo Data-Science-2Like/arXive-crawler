@@ -21,14 +21,15 @@ async def getData(dest):
     if not path.exists(dest):
         os.mkdir(dest)
 
-    paperCounter = Counter("Crawled {0} papers this minute.")
+    paperCounter = Counter("Crawled {0} papers this minute. Average: {1}")
 
     metaData = getPaperUrlsByCategory([10,62,122],200110617)
     requestCount = 0
     try:
         while requestCount < len(metaData):
             currUrls = list()
-            for record in range(0,burstSize):
+            for i in range(0,burstSize):
+                record = metaData[requestCount]
                 requestCount+= 1
                 url = replaceUrl(record[2])
                 currUrls.append((url,record[0]))
@@ -59,16 +60,16 @@ def checkSignature(buffer):
 
 async def downloadPaper(dest,url, identifier, session):
 
-    #data = requests.get(url, allow_redirects=True)
-    #if data.status_code != 200:
-    #    print("error on url: ", url)
-    #    if data.status_code == 403:
-    #        print("Seems like we got blocked :(")
-    #    raise Exception(str("Error ") + str(data.status_code))
+    # taken from https://stackoverflow.com/questions/57126286/fastest-parallel-requests-in-python
     try:
         async with session.get(url=url) as response:
             resp = await response.read()
             ext = checkSignature(resp[0:4])
+            if response.status != 200:
+                print("error on url: ", url)
+                if response.status == 403:
+                    print("Seems like we got blocked :(")
+                    raise Exception(str("Error ") + str(response.status))
 
             savePath = os.path.join(dest, str(identifier) + ext)
             open(savePath, 'wb').write(resp)

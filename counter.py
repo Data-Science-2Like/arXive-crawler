@@ -7,12 +7,13 @@ class Counter:
         self.counter = 0
         self.lastPrinted = 0
         self.oldMinute = time.time()
+        self.history = list()
 
     def increment(self, amount = 1):
         self.counter += amount
 
         if self.__minute_elapsed():
-            print(self.formatMessage.format(str(self.counter - self.lastPrinted)))
+            print(self.formatMessage.format(str(self.counter - self.lastPrinted), self.__average()))
             self.__printed()
 
     def __minute_elapsed(self):
@@ -21,3 +22,11 @@ class Counter:
     def __printed(self):
         self.lastPrinted = self.counter
         self.oldMinute = time.time()
+        self.history.append(self.counter - self.lastPrinted)
+
+    def __average(self):
+        length = len(self.history)
+        if length == 0:
+            # we dont want to divide by zero
+            length += 1
+        return sum(self.history) / length
