@@ -1,7 +1,8 @@
 import time
 import os
 import io
-import requests
+import asyncio
+import aiohttp
 from os import path
 from counter import Counter
 
@@ -14,7 +15,7 @@ sleepLength = 1
 def replaceUrl(url):
     return url.replace("arxiv.org",exportUrl).replace('abs','e-print')
 
-def getData(dest):
+async def getData(dest):
 
     #check if destination folder exists else create
     if not path.exists(dest):
@@ -22,21 +23,21 @@ def getData(dest):
 
     paperCounter = Counter("Crawled {0} papers this minute.")
 
-    metaData = getPaperUrlsByCategory([10,62,122],200000000)
+    metaData = getPaperUrlsByCategory([10,62,122],200110617)
     requestCount = 0
     try:
-        for record in metaData:
-            requestCount+= 1
+        while requestCount < len(metaData):
+            currUrls = list()
+            for record in range(0,burstSize):
+                requestCount+= 1
+                url = replaceUrl(record[2])
+                currUrls.append((url,record[0]))
 
-            # make request and download raw files
-            url = replaceUrl(record[2])
-            # print(url)
-            downloadPaper(dest, url, record[0])
+            async with aiohttp.ClientSession() as session:
+                ret = await asyncio.gather(*[downloadPaper(dest,url,id, session) for (url, id) in currUrls])
 
-            paperCounter.increment()
-
-            if requestCount % burstSize == 0:
-                time.sleep(1)
+            paperCounter.increment(burstSize)
+            time.sleep(sleepLength)
     except BaseException as err:
         print("Error oucurred after ", requestCount, " requests with burstSize: ", burstSize, " and sleepLength: ", sleepLength)
         raise
@@ -56,24 +57,30 @@ def checkSignature(buffer):
         raise ValueError("Unknown File Signature")
 
 
-def downloadPaper(dest,url, identifier):
+async def downloadPaper(dest,url, identifier, session):
 
-    data = requests.get(url, allow_redirects=True)
-    if data.status_code != 200:
-        print("error on url: ", url)
-        if data.status_code == 403:
-            print("Seems like we got blocked :(")
-        raise Exception(str("Error ") + str(data.status_code))
+    #data = requests.get(url, allow_redirects=True)
+    #if data.status_code != 200:
+    #    print("error on url: ", url)
+    #    if data.status_code == 403:
+    #        print("Seems like we got blocked :(")
+    #    raise Exception(str("Error ") + str(data.status_code))
+    try:
+        async with session.get(url=url) as response:
+            resp = await response.read()
+            ext = checkSignature(resp[0:4])
+
+            savePath = os.path.join(dest, str(identifier) + ext)
+            open(savePath, 'wb').write(resp)
+    except Exception as e:
+        print("Unable to get url {} due to {}.".format(url, e.__class__))
 
     # fileType = magic.from_buffer(data, mime=True)
     # print(fileType)
     # libmagic for windows not so easy :(
 
     # print("Signature: " , data.content[0:4])
-    ext = checkSignature(data.content[0:4])
 
-    savePath = os.path.join(dest, str(identifier) + ext)
-    open(savePath, 'wb').write(data.content)
 
 
 

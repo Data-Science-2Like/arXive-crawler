@@ -4,6 +4,8 @@ from datetime import datetime
 import metaCrawler as meta
 import dataCrawler as data
 
+import asyncio
+
 def get_records():
 
     meta.get_records(datetime.now(),datetime.now())
@@ -21,7 +23,7 @@ def get_records():
     #     print(record)
 
 def get_data():
-    data.getData("C:\\Users\\Simon\\Desktop\\ai_papers")
+    asyncio.run(data.getData("C:\\Users\\Simon\\Desktop\\ai_papers"))
 
 
 if __name__ == '__main__':

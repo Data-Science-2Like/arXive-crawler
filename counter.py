@@ -8,8 +8,8 @@ class Counter:
         self.lastPrinted = 0
         self.oldMinute = time.time()
 
-    def increment(self):
-        self.counter += 1
+    def increment(self, amount = 1):
+        self.counter += amount
 
         if self.__minute_elapsed():
             print(self.formatMessage.format(str(self.counter - self.lastPrinted)))
