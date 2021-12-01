@@ -13,6 +13,7 @@ class Counter:
         self.counter += amount
 
         if self.__minute_elapsed():
+            self.history.append(self.counter - self.lastPrinted)
             print(self.formatMessage.format(str(self.counter - self.lastPrinted), self.__average()))
             self.__printed()
 
@@ -20,7 +21,6 @@ class Counter:
         return time.time() - self.oldMinute >= 60
 
     def __printed(self):
-        self.history.append(self.counter - self.lastPrinted)
         self.lastPrinted = self.counter
         self.oldMinute = time.time()
 
