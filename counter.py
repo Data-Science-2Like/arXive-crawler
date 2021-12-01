@@ -12,7 +12,7 @@ class Counter:
         self.counter += 1
 
         if self.__minute_elapsed():
-            print(format(self.formatMessage), self.counter - self.lastPrinted)
+            print(format(self.formatMessage, self.counter - self.lastPrinted))
             self.__printed()
 
     def __minute_elapsed(self):

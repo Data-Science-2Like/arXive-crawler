@@ -44,11 +44,16 @@ def getData(dest):
 
 def checkSignature(buffer):
     # guess the filetype based on the beginning of the buffer
-    tarSig = bytearray([0x1F,0x8B,0x08, 0x08])
-    if tarSig == buffer :
+    tarSig1 = bytearray([0x1F,0x8B,0x08, 0x08])
+    tarSig2 = bytearray([0x1F, 0x8B, 0x08, 0x00])
+
+    pdfSig = bytearray("%PDF".encode())
+    if tarSig1 == buffer or tarSig2 == buffer:
         return '.tar.gz'
-    else:
+    elif pdfSig == buffer:
         return '.pdf'
+    else:
+        raise ValueError("Unknown File Signature")
 
 
 def downloadPaper(dest,url, identifier):
@@ -64,6 +69,7 @@ def downloadPaper(dest,url, identifier):
     # print(fileType)
     # libmagic for windows not so easy :(
 
+    # print("Signature: " , data.content[0:4])
     ext = checkSignature(data.content[0:4])
 
     savePath = os.path.join(dest, str(identifier) + ext)
