@@ -46,14 +46,14 @@ def checkSignature(buffer):
 
 def downloadPaper(dest,url, identifier):
 
-    #rawPage = requests.get(url)
-    #if (rawPage.status_code != 200):
-    #    print("error on url: ", url)
-
     #soup = BeautifulSoup(rawPage.content, 'html.parser')
 
     data = requests.get(url, allow_redirects=True)
-
+    if data.status_code != 200:
+        print("error on url: ", url)
+        if data.status_code == 403:
+            print("Seems like we got blocked :(")
+        raise Exception(str("Error ") + str(data.status_code))
     # fileType = magic.from_buffer(data, mime=True)
     # print(fileType)
     # libmagic for windows not so easy :(
