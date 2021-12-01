@@ -20,9 +20,9 @@ class Counter:
         return time.time() - self.oldMinute >= 60
 
     def __printed(self):
+        self.history.append(self.counter - self.lastPrinted)
         self.lastPrinted = self.counter
         self.oldMinute = time.time()
-        self.history.append(self.counter - self.lastPrinted)
 
     def __average(self):
         length = len(self.history)

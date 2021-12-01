@@ -23,7 +23,7 @@ async def getData(dest):
 
     paperCounter = Counter("Crawled {0} papers this minute. Average: {1}")
 
-    metaData = getPaperUrlsByCategory([10,62,122],200110617)
+    metaData = getPaperUrlsByCategory([10,62,122],200111396)
     requestCount = 0
     try:
         while requestCount < len(metaData):
