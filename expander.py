@@ -29,11 +29,20 @@ def check_if_main(file):
     if os.path.isdir(file):
         return False
     str = "\\begin{document}"
-    with open(file) as f:
-        if str in f.read():
-            return True
+    encodings = ['utf-8','ascii']  # add more
+    for e in encodings:
+        try:
+            with open(file, mode="r", encoding="utf-8") as f:
+                if str in f.read():
+                    return True
+                else:
+                    return False
+        except UnicodeDecodeError:
+            print('got unicode error with %s , trying different encoding' % e)
+            continue
         else:
-            return False
+            break
+    return False
 
 def extractLatex(source,dest):
 
@@ -62,14 +71,12 @@ def extractLatex(source,dest):
             # find main file
             mainFile = str()
             for candidate in os.listdir(tmpWorkingDir):
-                try:
-                    if check_if_main(os.path.join(tmpWorkingDir, candidate)):
-                        mainFile = os.path.join(tmpWorkingDir, candidate)
-                        break
-                except UnicodeDecodeError:
-                    # skipping non text file
-                    continue
-
+                if candidate.endswith(".tex") and check_if_main(os.path.join(tmpWorkingDir, candidate)):
+                    mainFile = os.path.join(tmpWorkingDir, candidate)
+                    break
+            if mainFile == "":
+                print(f"Couldn't find main latex file, skipping {filename}")
+                continue
             try:
                 # nome execute the perl script
                 # mainStr = f"'{mainFile}'"
