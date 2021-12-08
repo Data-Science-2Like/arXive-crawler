@@ -43,6 +43,10 @@ def extractLatex(source,dest):
 
     tmpWorkingDir = tempfile.mkdtemp()
 
+    # we need to set the enviroment variable here for the perl script to use this as
+    # a working directory
+    os.environ["TEXINPUTS"] = tmpWorkingDir
+
     for filename in os.listdir(source):
         if filename.endswith("tar.gz"):
 
