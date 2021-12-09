@@ -15,7 +15,7 @@ arXiv supports the OAI protocol for metadata harvesting which is described here 
 This Crawler tries to abide by the rules delcared on https://arxiv.org/help/bulk_data.
 Herefore the Parameters
 - burstSize: 4
-- sleepLength: 1
+- sleepLength: 1  
 can be adapted manually to change the download rate. All files get either saved as .pdf or .tar.gz depending on the avialability of source material.
 
 ## Latex Expanding
