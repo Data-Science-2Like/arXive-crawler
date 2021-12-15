@@ -9,8 +9,8 @@ import argparse
 import asyncio
 
 
-def get_records():
-    meta.get_records(datetime.now(),datetime.now())
+def get_records(von, bis):
+    meta.get_records(von,bis)
 
 
 def get_data():
@@ -21,15 +21,28 @@ def expand_latex():
     exp.extractLatex("C:\\Users\\Simon\\Desktop\\ai_papers", "C:\\Users\\Simon\\Desktop\\ai_papers\\latex")
 
 if __name__ == '__main__':
-    parent_parser = argparse.ArgumentParser()
-    parent_parser.add_argument('--out', '-o', default= '.', help='output directory')
-    parent_parser.add_argument('--debug', default=False, required=False, help='debug flag')
     main_parser = argparse.ArgumentParser()
-    meta_subparsers = main_parser.add_subparsers(title="metadata", dest="metadata_command")
-    meta_parser = meta_subparsers.add_parser("meta", help="collect metadata", parents=[parent_parser])
+    main_parser.add_argument('--out', '-o', default='.', help='output directory')
+    main_parser.add_argument('--debug', default=False, required=False, help='debug flag')
+    cmd_parsers = main_parser.add_subparsers(title="commands")
 
     ## meta options
+    meta_parser = cmd_parsers.add_parser("meta", help="collect metadata")
+    meta_parser.add_argument('--from', default=datetime.now(), required=False, help='start date for metadata')
+    meta_parser.add_argument('--until', default=datetime.now(), required=False, help='end date for metadata')
 
 
-    download_parsers = main_parser.add_subparsers(title="download", dest="download_command")
-    download_parser = download_parsers.add_parser("download", help="download raw data", parents=[parent_parser])
+    # download options
+    download_parser = cmd_parsers.add_parser("download", help="download raw data")
+
+    args = main_parser.parse_args()
+
+    arguments = vars(args)
+
+    if "meta_command" in arguments.keys():
+        print("meta")
+
+    elif "download_command" in arguments.keys():
+        print("download")
+    else:
+        main_parser.print_help()
