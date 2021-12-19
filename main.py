@@ -24,7 +24,7 @@ if __name__ == '__main__':
     main_parser = argparse.ArgumentParser()
     main_parser.add_argument('--out', '-o', default='.', help='output directory')
     main_parser.add_argument('--debug', default=False, required=False, help='debug flag')
-    cmd_parsers = main_parser.add_subparsers(title="commands")
+    cmd_parsers = main_parser.add_subparsers(title="commands", dest="command")
 
     ## meta options
     meta_parser = cmd_parsers.add_parser("meta", help="collect metadata")
@@ -36,13 +36,12 @@ if __name__ == '__main__':
     download_parser = cmd_parsers.add_parser("download", help="download raw data")
 
     args = main_parser.parse_args()
-
     arguments = vars(args)
-
-    if "meta_command" in arguments.keys():
+    used_command =  arguments["command"]
+    if "meta" == used_command:
         print("meta")
 
-    elif "download_command" in arguments.keys():
+    elif "download" == used_command:
         print("download")
     else:
         main_parser.print_help()
