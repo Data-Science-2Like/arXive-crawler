@@ -3,9 +3,9 @@ from oaipmh.metadata import MetadataRegistry, oai_dc_reader
 
 from database import initDatabase, insertPaper, commit
 
-def get_records(von, bis):
+def get_records(von, bis, debug):
 
-    URL = 'http://export.arxiv.org/oai2'
+    URL = 'https://export.arxiv.org/oai2'
 
     registry = MetadataRegistry()
     registry.registerReader('oai_dc', oai_dc_reader)
@@ -19,6 +19,7 @@ def get_records(von, bis):
         insertPaper(str(meta.getField('identifier')[0]).split('/')[-1].replace('.',''),meta.getField('title'),meta.getField('creator'), meta.getField('subject'), meta.getField('date'), meta.getField('identifier'))
         if count % 100 == 0:
             commit()
+            print("fetched ", count, " documents")
     commit()
     # for record in client.listRecords(metadataPrefix='oai_dc'):
     #     print(record)
