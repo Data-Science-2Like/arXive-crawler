@@ -5,7 +5,7 @@ from database import initDatabase, insertPaper, commit
 
 def get_records(von, bis, debug):
 
-    URL = 'https://export.arxiv.org/oai2'
+    URL = 'http://export.arxiv.org/oai2'
 
     registry = MetadataRegistry()
     registry.registerReader('oai_dc', oai_dc_reader)
