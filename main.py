@@ -39,7 +39,7 @@ if __name__ == '__main__':
     arguments = vars(args)
     used_command =  arguments["command"]
     if "meta" == used_command:
-        print("meta")
+        meta.get_records(arguments["from"],arguments["until"])
 
     elif "download" == used_command:
         print("download")
