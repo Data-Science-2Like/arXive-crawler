@@ -35,6 +35,13 @@ if __name__ == '__main__':
     # download options
     download_parser = cmd_parsers.add_parser("download", help="download raw data")
 
+
+
+    # expander options
+    expand_parser = cmd_parsers.add_parser("expand", help="expand files")
+    expand_parser.add_argument('--in','-i', help='input data directory')
+    expand_parser.add_argument('--bib', default=False, required=False, help='also extract bib resources')
+
     args = main_parser.parse_args()
     arguments = vars(args)
     used_command =  arguments["command"]
@@ -43,5 +50,8 @@ if __name__ == '__main__':
 
     elif "download" == used_command:
         print("download")
+
+    elif "expander" == used_command:
+        exp.extractLatex(arguments["in"], arguments["out"], arguments["debug"], arguments["bib"])
     else:
         main_parser.print_help()

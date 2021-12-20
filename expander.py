@@ -44,7 +44,7 @@ def check_if_main(file):
             break
     return False
 
-def extractLatex(source,dest):
+def extractLatex(source,dest,debug,bibtex):
 
     #check if destination folder exists else create
     if not path.exists(dest):
@@ -74,6 +74,12 @@ def extractLatex(source,dest):
                 if candidate.endswith(".tex") and check_if_main(os.path.join(tmpWorkingDir, candidate)):
                     mainFile = os.path.join(tmpWorkingDir, candidate)
                     break
+
+                # if bibtex option is set also export bibtex file
+                if candidate.endswith(".bib") and bibtex:
+                    idStr = filename.split(".")[0] + ".bib"
+                    os.rename(os.path.join(tmpWorkingDir, candidate), os.path.join(dest, idStr))
+
             if mainFile == "":
                 print(f"Couldn't find main latex file, skipping {filename}")
                 continue
