@@ -8,18 +8,6 @@ import argparse
 
 import asyncio
 
-
-def get_records(von, bis):
-    meta.get_records(von,bis)
-
-
-def get_data():
-    asyncio.run(data.getData("C:\\Users\\Simon\\Desktop\\ai_papers"))
-
-
-def expand_latex():
-    exp.extractLatex("C:\\Users\\Simon\\Desktop\\ai_papers", "C:\\Users\\Simon\\Desktop\\ai_papers\\latex")
-
 if __name__ == '__main__':
     main_parser = argparse.ArgumentParser()
     main_parser.add_argument('--out', '-o', default='.', help='output directory')
