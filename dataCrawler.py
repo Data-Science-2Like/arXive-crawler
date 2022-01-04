@@ -9,13 +9,12 @@ from counter import Counter
 from database import initDatabase,getPaperUrls, commit, getPaperUrlsByCategory
 
 exportUrl = "export.arxiv.org"
-burstSize = 4
-sleepLength = 1
+
 
 def replaceUrl(url):
     return url.replace("arxiv.org",exportUrl).replace('abs','e-print')
 
-async def getData(dest):
+async def getData(dest, sleepLength, burstSize):
 
     #check if destination folder exists else create
     if not path.exists(dest):
@@ -23,7 +22,7 @@ async def getData(dest):
 
     paperCounter = Counter("Crawled {0} papers this minute. Average: {1}")
 
-    metaData = getPaperUrlsByCategory([10,62,122],200201048)
+    metaData = getPaperUrlsByCategory([10,62,122],0)
     requestCount = 0
     try:
         while requestCount < len(metaData):
