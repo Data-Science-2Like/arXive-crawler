@@ -49,7 +49,7 @@ if __name__ == '__main__':
         meta.get_records(arguments["from"],arguments["until"], arguments["debug"])
 
     elif "download" == used_command:
-        print("download")
+        asyncio.run(data.getData(arguments["out"]))
 
     elif "expander" == used_command:
         exp.extractLatex(arguments["in"], arguments["out"], arguments["debug"], arguments["bib"])
