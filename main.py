@@ -24,7 +24,7 @@ if __name__ == '__main__':
     download_parser = cmd_parsers.add_parser("download", help="download raw data")
     download_parser.add_argument('--sleep', default=1, required=False, help='sleep time between two burst')
     download_parser.add_argument('--burst', default=4, required=False, help='size of one reading burst')
-
+    download_parser.add_argument('--start', default=0, required=False, help='the start id of the papres which are going to be crawled')
 
     # expander options
     expand_parser = cmd_parsers.add_parser("expand", help="expand files")
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         meta.get_records(arguments["from"],arguments["until"], arguments["debug"])
 
     elif "download" == used_command:
-        asyncio.run(data.getData(arguments["out"], arguments["sleep"], arguments["burst"]))
+        asyncio.run(data.getData(arguments["out"], arguments["start"],arguments["sleep"], arguments["burst"]))
 
     elif "expander" == used_command:
         exp.extractLatex(arguments["in"], arguments["out"], arguments["debug"], arguments["bib"])
