@@ -52,6 +52,17 @@ async def getData(dest, start_id, sleepLength, burstSize, proxy, diff):
     if not path.exists(dest):
         os.mkdir(dest)
 
+    user_agents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36',
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+        'Mozilla/5.0 (Linux; Android 11; SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Mobile Safari/537.36'
+    ]
+    user_agent = random.choice(user_agents)
+    headers = {'User-Agent': user_agent}
+
+
     paperCounter = Counter("Crawled {0} papers this minute. Average: {1}")
 
     job_queue = getPaperUrlsByCategory([10, 62, 122], start_id)
@@ -82,7 +93,7 @@ async def getData(dest, start_id, sleepLength, burstSize, proxy, diff):
                 currUrls.append((url, record[0]))
 
             newProxyNeeded = False
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(headers=headers) as session:
                 ret = await asyncio.gather(*[downloadPaper(dest, url, id, session, get_proxy(proxy_list, len(curr_proxy) > 4), record) for (url, id) in currUrls])
                 for status, st_record in ret:
                     if status is not Status.OK:
