@@ -5,6 +5,7 @@ import asyncio
 import re
 from enum import Enum
 from random import random
+from pathlib import Path
 
 import pandas as pd
 
@@ -36,39 +37,63 @@ def get_proxy(proxy_list, use):
     proxy_str = "http://" + str(proxy_list.iat[idx,0]) + ":" + str(proxy_list.iat[idx,1])
     return proxy_str
 
-async def getData(dest, start_id, sleepLength, burstSize):
+def get_ids_from_disk(dest):
+    ids = list()
+    for filename in os.listdir(dest):
+        stemmed = Path(filename).stem
+        if filename.endswith("tar.gz"):
+            stemmed = Path(stemmed).stem
+        ids.append(stemmed)
+    return ids
+
+
+async def getData(dest, start_id, sleepLength, burstSize, proxy, diff):
     # check if destination folder exists else create
     if not path.exists(dest):
         os.mkdir(dest)
 
     paperCounter = Counter("Crawled {0} papers this minute. Average: {1}")
 
-    metaData = getPaperUrlsByCategory([10, 62, 122], start_id)
+    job_queue = getPaperUrlsByCategory([10, 62, 122], start_id)
+    already_existing_ids = list()
+    def check_existing(id):
+        if str(id) not in already_existing_ids:
+            return True
+        return False
+
+    if diff:
+        already_existing_ids = get_ids_from_disk(dest)
+        old = len(job_queue)
+        print("Fetching already existing paper entries. Found ", len(already_existing_ids))
+        job_queue = list(filter(lambda x: check_existing(x[0]), job_queue))
+        print("Skipping ", old - len(job_queue)," entries")
+
+    print("Beginning to crawl " , len(job_queue), " papers")
     requestCount = 0
     curr_proxy = str()
     proxy_list = get_proxy_list()
     try:
-        while requestCount < len(metaData):
+        while requestCount < len(job_queue):
             currUrls = list()
             for i in range(0, burstSize):
-                record = metaData[requestCount]
+                record = job_queue[requestCount]
                 requestCount += 1
                 url = replaceUrl(record[2],len(curr_proxy) > 4)
                 currUrls.append((url, record[0]))
 
             newProxyNeeded = False
             async with aiohttp.ClientSession() as session:
-                ret = await asyncio.gather(*[downloadPaper(dest, url, id, session, get_proxy(proxy_list, len(curr_proxy) > 4)) for (url, id) in currUrls])
-                for status, st_url in ret:
+                ret = await asyncio.gather(*[downloadPaper(dest, url, id, session, get_proxy(proxy_list, len(curr_proxy) > 4), record) for (url, id) in currUrls])
+                for status, st_record in ret:
                     if status is not Status.OK:
-                        metaData.append(st_url)
-                        print("Adding {} again to list to query it later".format(st_url))
+                        job_queue.append(st_record)
+                        print("Adding {} again to list to query it later".format(st_record[0]))
                         newProxyNeeded = True
                     if status is Status.OK:
                         paperCounter.increment(1)
             time.sleep(sleepLength)
 
-            if newProxyNeeded:
+            if newProxyNeeded and proxy:
                 # get new proxy
                 proxy_list = get_proxy_list()
                 idx = int(random() * len(proxy_list))
@@ -95,7 +120,7 @@ def checkSignature(buffer):
         raise ValueError("Unknown File Signature")
 
 
-async def downloadPaper(dest, url, identifier, session, proxy):
+async def downloadPaper(dest, url, identifier, session, proxy, tuple):
     # taken from https://stackoverflow.com/questions/57126286/fastest-parallel-requests-in-python
     try:
         if len(proxy) > 4:
@@ -103,16 +128,16 @@ async def downloadPaper(dest, url, identifier, session, proxy):
                 resp = await response.read()
                 # First check if response was successfully
                 if response.status != 200:
-                    print("error on url: ", url)
+                    print("error on url: ", tuple)
                     if response.status == 403:
                         print("Seems like we got blocked :(")
                         raise BlockedConnection()
-                    return Status.ERROR, url
+                    return Status.ERROR, tuple
                 else:
                     ext = checkSignature(resp[0:4])
                     savePath = os.path.join(dest, str(identifier) + ext)
                     open(savePath, 'wb').write(resp)
-                    return Status.OK, url
+                    return Status.OK, tuple
         else:
             async with session.get(url=url) as response:
                 resp = await response.read()
@@ -122,18 +147,18 @@ async def downloadPaper(dest, url, identifier, session, proxy):
                     if response.status == 403:
                         print("Seems like we got blocked :(")
                         raise BlockedConnection()
-                    return Status.ERROR, url
+                    return Status.ERROR, tuple
                 else:
                     ext = checkSignature(resp[0:4])
                     savePath = os.path.join(dest, str(identifier) + ext)
                     open(savePath, 'wb').write(resp)
-                    return Status.OK, url
+                    return Status.OK, tuple
     except BlockedConnection as e:
         print("Unable to get url {} because the access is blocked".format(url))
-        return Status.BLOCKED, url
+        return Status.BLOCKED, tuple
     except Exception as e:
         print("Unable to get url {} due to {}.".format(url, e.__class__))
-        return Status.ERROR, url
+        return Status.ERROR, tuple
 
 
 class Status(Enum):
