@@ -40,7 +40,7 @@ if __name__ == '__main__':
         meta.get_records(arguments["from"],arguments["until"], arguments["debug"])
 
     elif "download" == used_command:
-        asyncio.run(data.getData(arguments["out"], arguments["start"],arguments["sleep"], arguments["burst"], arguments["proxy"], arguments["diff"]))
+        asyncio.run(data.getData(arguments["out"], arguments["start"],int(arguments["sleep"]), int(arguments["burst"]), arguments["proxy"], arguments["diff"]))
 
     elif "expander" == used_command:
         exp.extractLatex(arguments["in"], arguments["out"], arguments["debug"], arguments["bib"])
