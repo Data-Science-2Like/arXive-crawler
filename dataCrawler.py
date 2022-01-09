@@ -57,7 +57,7 @@ def get_ids_from_disk(dest):
     return ids
 
 
-async def getData(dest, start_id, sleepLength, burstSize, proxy, diff):
+async def getData(dest, start_id,stop_id, sleepLength, burstSize, proxy, diff):
     # check if destination folder exists else create
     if not path.exists(dest):
         os.mkdir(dest)
@@ -75,7 +75,7 @@ async def getData(dest, start_id, sleepLength, burstSize, proxy, diff):
 
     paperCounter = Counter("Crawled {0} papers this minute. Average: {1}")
 
-    job_queue = getPaperUrlsByCategory([10, 62, 122], start_id)
+    job_queue = getPaperUrlsByCategory([10, 62, 122], start_id,stop_id)
     already_existing_ids = list()
     def check_existing(id):
         if str(id) not in already_existing_ids:

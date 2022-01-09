@@ -77,7 +77,7 @@ def getPaperUrls(startingId = 0) :
 
     return result
 
-def getPaperUrlsByCategory(categories,startingId = 0):
+def getPaperUrlsByCategory(categories,startingId = 0, stopId = 3000000000):
     cur = conn.cursor()
 
     # becase python, we first need to convert all ints to str
@@ -86,7 +86,7 @@ def getPaperUrlsByCategory(categories,startingId = 0):
     categoriesStr = ",".join(converted)
     cur.execute('''SELECT DISTINCT id, title, url, datetime FROM papers
     INNER JOIN tagged ON papers.id = tagged.paperID
-    WHERE papers.id >= ? AND tagged.subjectID IN(''' + categoriesStr + ')', (startingId,))
+    WHERE papers.id >= ? AND papers.id <= ? AND tagged.subjectID IN(''' + categoriesStr + ')', (startingId, stopId,))
     # we need to add the categories string manually because passing it as a parameter doesn't work somehow
 
 

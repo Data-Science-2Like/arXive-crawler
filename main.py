@@ -25,7 +25,8 @@ if __name__ == '__main__':
     download_parser = cmd_parsers.add_parser("download", help="download raw data")
     download_parser.add_argument('--sleep', default=2, required=False, help='sleep time between two burst')
     download_parser.add_argument('--burst', default=4, required=False, help='size of one reading burst')
-    download_parser.add_argument('--start', default=0, required=False, help='the start id of the papres which are going to be crawled')
+    download_parser.add_argument('--start', default=0, required=False, help='the start id of the papers which are going to be crawled')
+    download_parser.add_argument('--end', default=3000000000, required=False, help='the end id of the papers which are going to be crawled')
     download_parser.add_argument('--proxy', default=False, required=False, help='allows the use of proxys when connection gets blocked', action='store_true')
     download_parser.add_argument('--diff', default=False, required=False, help='rescans the directory before starting crawling to determine which files already have been downloaded', action='store_true')
 
@@ -46,7 +47,7 @@ if __name__ == '__main__':
         meta.get_records(arguments["from"],arguments["until"], arguments["debug"])
 
     elif "download" == used_command:
-        asyncio.run(data.getData(arguments["out"], arguments["start"],int(arguments["sleep"]), int(arguments["burst"]), arguments["proxy"], arguments["diff"]))
+        asyncio.run(data.getData(arguments["out"], arguments["start"], arguments["end"],int(arguments["sleep"]), int(arguments["burst"]), arguments["proxy"], arguments["diff"]))
 
     elif "expand" == used_command:
         exp.extractLatex(arguments["in"], arguments["out"], arguments["debug"], arguments["bib"])
