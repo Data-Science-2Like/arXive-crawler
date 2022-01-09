@@ -44,7 +44,7 @@ def get_ids_from_disk(dest):
         # now readin ids from json file
         if (filename.endswith("json")):
             with open(os.path.join(dest, filename), 'w', encoding='utf-8') as f:
-                more_ids = json.read(f)
+                more_ids = json.load(f)
                 ids = ids + more_ids
                 continue
 
