@@ -5,8 +5,8 @@ import io
 import asyncio
 import re
 from enum import Enum
-from random import random
 from pathlib import Path
+from random import random, choice
 
 import pandas as pd
 
@@ -69,7 +69,7 @@ async def getData(dest, start_id,stop_id, sleepLength, burstSize, proxy, diff):
         'Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
         'Mozilla/5.0 (Linux; Android 11; SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Mobile Safari/537.36'
     ]
-    user_agent = random.choice(user_agents)
+    user_agent = choice(user_agents)
     headers = {'User-Agent': user_agent}
 
 
