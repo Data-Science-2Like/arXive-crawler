@@ -70,7 +70,7 @@ async def getData(dest, start_id,stop_id, sleepLength, burstSize, proxy, diff):
         'Mozilla/5.0 (Linux; Android 11; SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.72 Mobile Safari/537.36'
     ]
     user_agent = choice(user_agents)
-    headers = {'User-Agent': user_agent}
+    # headers = {'User-Agent': user_agent}
 
 
     paperCounter = Counter("Crawled {0} papers this minute. Average: {1}")
@@ -103,7 +103,7 @@ async def getData(dest, start_id,stop_id, sleepLength, burstSize, proxy, diff):
                 currUrls.append((url, record[0]))
 
             newProxyNeeded = False
-            async with aiohttp.ClientSession(headers=headers) as session:
+            async with aiohttp.ClientSession() as session:
                 ret = await asyncio.gather(*[downloadPaper(dest, url, id, session, get_proxy(proxy_list, len(curr_proxy) > 4), record) for (url, id) in currUrls])
                 for status, st_record in ret:
                     if status is not Status.OK:
