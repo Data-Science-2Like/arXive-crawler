@@ -1,3 +1,4 @@
+import json
 import time
 import os
 import io
@@ -40,7 +41,16 @@ def get_proxy(proxy_list, use):
 def get_ids_from_disk(dest):
     ids = list()
     for filename in os.listdir(dest):
+        # now readin ids from json file
+        if (filename.endswith("json")):
+            with open(os.path.join(dest, filename), 'w', encoding='utf-8') as f:
+                more_ids = json.read(f)
+                ids = ids + more_ids
+                continue
+
+        # otherwise it must be raw data
         stemmed = Path(filename).stem
+        # double stemming because stem only removes on extension
         if filename.endswith("tar.gz"):
             stemmed = Path(stemmed).stem
         ids.append(stemmed)

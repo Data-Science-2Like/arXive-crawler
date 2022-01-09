@@ -4,6 +4,7 @@ from datetime import datetime
 import metaCrawler as meta
 import dataCrawler as data
 import expander as exp
+import jsonExporter as json
 import argparse
 
 import asyncio
@@ -33,6 +34,11 @@ if __name__ == '__main__':
     expand_parser.add_argument('--in','-i', help='input data directory')
     expand_parser.add_argument('--bib', default=False, required=False, help='also extract bib resources')
 
+    # zip options
+    zip_parser = cmd_parsers.add_parser("zip", help="zips to metadata file")
+    zip_parser.add_argument('--name', default="ids.json", required=False, help='The name of the file to which the ids get exported')
+
+
     args = main_parser.parse_args()
     arguments = vars(args)
     used_command =  arguments["command"]
@@ -42,7 +48,10 @@ if __name__ == '__main__':
     elif "download" == used_command:
         asyncio.run(data.getData(arguments["out"], arguments["start"],int(arguments["sleep"]), int(arguments["burst"]), arguments["proxy"], arguments["diff"]))
 
-    elif "expander" == used_command:
+    elif "expand" == used_command:
         exp.extractLatex(arguments["in"], arguments["out"], arguments["debug"], arguments["bib"])
+
+    elif "zip" == used_command:
+        json.exportDownload(arguments["out"], arguments["name"])
     else:
         main_parser.print_help()
