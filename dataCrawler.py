@@ -121,6 +121,9 @@ async def getData(dest, start_id,stop_id, sleepLength, burstSize, proxy, diff):
                 curr_proxy = "http://" + str(proxy_list.iat[idx,0]) + str(":") + str(proxy_list.iat[idx,1])
                 # print("Now using proxy ", curr_proxy)
                 print("Got new proxy list")
+
+            if newProxyNeeded and not proxy:
+                raise Exception("Seems like we got blocked consider activating the proxy option")
     except BaseException as err:
         print("Error oucurred after ", requestCount, " requests with burstSize: ", burstSize, " and sleepLength: ",
               sleepLength)
