@@ -5,6 +5,7 @@ import shutil
 import subprocess
 from os import path
 
+
 def clearFolder(folder):
     # shamelessly copied from https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder
     for filename in os.listdir(folder):
@@ -25,11 +26,12 @@ def texFiles(members):
         if tarinfo.name.endswith("tex"):
             yield tarinfo
 
+
 def check_if_main(file):
     if os.path.isdir(file):
         return False
     str = "\\begin{document}"
-    encodings = ['utf-8','ascii']  # add more
+    encodings = ['utf-8', 'ascii']  # add more
     for e in encodings:
         try:
             with open(file, mode="r", encoding="utf-8") as f:
@@ -44,13 +46,14 @@ def check_if_main(file):
             break
     return False
 
-def move_file(source,dest,override=False):
+
+def move_file(source, dest, override=False):
     if not path.exists(source) or (path.exists(dest) and not override):
         return
     dest_drive = os.path.splitdrive(dest)
     source_drive = os.path.splitdrive(source)
     if dest_drive == source_drive:
-        os.rename(source,dest)
+        os.rename(source, dest)
     else:
         # when output directory is on a different disk than the temp directory we need to use another function
         # https://python.omics.wiki/file-operations/file-commands/os-rename-vs-shutil-move
@@ -60,9 +63,8 @@ def move_file(source,dest,override=False):
         os.rename(os.path.join(os.path.dirname(dest), os.path.basename(source)), dest)
 
 
-def extractLatex(source,dest,debug,bibtex):
-
-    #check if destination folder exists else create
+def extractLatex(source, dest, debug, bibtex, start):
+    # check if destination folder exists else create
     if not path.exists(dest):
         os.mkdir(dest)
 
@@ -71,10 +73,17 @@ def extractLatex(source,dest,debug,bibtex):
     # we need to set the enviroment variable here for the perl script to use this as
     # a working directory
     os.environ["TEXINPUTS"] = tmpWorkingDir
-
+    skipping = False
     for filename in os.listdir(source):
         if filename.endswith("tar.gz"):
-
+            idStr = filename.split(".")[0]
+            if start > int(idStr):
+                if not skipping:
+                    print("Skipping entries")
+                    skipping = True
+                continue
+            skipping = False
+            print("Started extracting paper ", idStr)
             clearFolder(tmpWorkingDir)
             # print(os.path.join(source, filename))
             try:
@@ -86,6 +95,7 @@ def extractLatex(source,dest,debug,bibtex):
 
             # find main file
             mainFile = str()
+            bib_found = False
             for candidate in os.listdir(tmpWorkingDir):
                 if candidate.endswith(".tex") and check_if_main(os.path.join(tmpWorkingDir, candidate)):
                     mainFile = os.path.join(tmpWorkingDir, candidate)
@@ -93,8 +103,16 @@ def extractLatex(source,dest,debug,bibtex):
 
                 # if bibtex option is set also export bibtex file
                 if candidate.endswith(".bib") and bibtex:
+                    bib_found = True
                     idStr = filename.split(".")[0] + ".bib"
-                    move_file(os.path.join(tmpWorkingDir, candidate),os.path.join(dest, idStr))
+                    move_file(os.path.join(tmpWorkingDir, candidate), os.path.join(dest, idStr))
+                if candidate.endswith(".bbl") and bibtex:
+                    bib_found = True
+                    idStr = filename.split(".")[0] + ".bbl"
+                    move_file(os.path.join(tmpWorkingDir, candidate), os.path.join(dest, idStr))
+
+            if bibtex and not bib_found:
+                print(f"Couldn't find bibliography file for {filename}")
 
             if mainFile == "":
                 print(f"Couldn't find main latex file, skipping {filename}")
@@ -111,7 +129,7 @@ def extractLatex(source,dest,debug,bibtex):
 
             # now move file to output directory
             idStr = filename.split(".")[0] + ".tex"
-            move_file(os.path.join(tmpWorkingDir, "outputExpander.tex"),os.path.join(dest, idStr))
+            move_file(os.path.join(tmpWorkingDir, "outputExpander.tex"), os.path.join(dest, idStr))
 
             # source latexpand: https://gitlab.com/latexpand/latexpand/-/blob/master/latexpand
     # remove the working temp directory after being done

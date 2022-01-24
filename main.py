@@ -34,10 +34,13 @@ if __name__ == '__main__':
     expand_parser = cmd_parsers.add_parser("expand", help="expand files")
     expand_parser.add_argument('--in','-i', help='input data directory')
     expand_parser.add_argument('--bib', default=False, required=False, help='also extract bib resources', action='store_true')
+    expand_parser.add_argument('--start', default=0, required=False,
+                            help='the start id of the papers which are going to be expanded')
 
     # zip options
     zip_parser = cmd_parsers.add_parser("zip", help="zips to metadata file")
     zip_parser.add_argument('--name', default="ids.json", required=False, help='The name of the file to which the ids get exported')
+
 
 
     args = main_parser.parse_args()
@@ -50,7 +53,7 @@ if __name__ == '__main__':
         asyncio.run(data.getData(arguments["out"], arguments["start"], arguments["end"],int(arguments["sleep"]), int(arguments["burst"]), arguments["proxy"], arguments["diff"]))
 
     elif "expand" == used_command:
-        exp.extractLatex(arguments["in"], arguments["out"], arguments["debug"], arguments["bib"])
+        exp.extractLatex(arguments["in"], arguments["out"], arguments["debug"], arguments["bib"], int(arguments["start"]))
 
     elif "zip" == used_command:
         json.exportDownload(arguments["out"], arguments["name"])
