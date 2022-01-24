@@ -23,3 +23,27 @@ requests.exceptions.ConnectionError: HTTPSConnectionPool(host='free-proxy-list.n
 
 Mögliche Ursachen:
 - Server hat internet verbindung verloren
+
+
+Traceback (most recent call last):
+  File "main.py", line 50, in <module>
+    asyncio.run(data.getData(arguments["out"], arguments["start"], arguments["end"],int(arguments["sleep"]), int(arguments["burst"]), arguments["proxy"], arguments["diff"]))
+  File "/usr/lib/python3.8/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/lib/python3.8/asyncio/base_events.py", line 616, in run_until_complete
+    return future.result()
+  File "/home/simon/arXive-crawler/dataCrawler.py", line 119, in getData
+    proxy_list = get_proxy_list()
+  File "/home/simon/arXive-crawler/dataCrawler.py", line 30, in get_proxy_list
+    resp = requests.get('https://free-proxy-list.net/')
+  File "/usr/lib/python3/dist-packages/requests/api.py", line 76, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/lib/python3/dist-packages/requests/api.py", line 61, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/lib/python3/dist-packages/requests/sessions.py", line 530, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/lib/python3/dist-packages/requests/sessions.py", line 643, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/lib/python3/dist-packages/requests/adapters.py", line 498, in send
+    raise ConnectionError(err, request=request)
+requests.exceptions.ConnectionError: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))

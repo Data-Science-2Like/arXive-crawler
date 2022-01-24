@@ -44,6 +44,22 @@ def check_if_main(file):
             break
     return False
 
+def move_file(source,dest,override=False):
+    if not path.exists(source) or (path.exists(dest) and not override):
+        return
+    dest_drive = os.path.splitdrive(dest)
+    source_drive = os.path.splitdrive(source)
+    if dest_drive == source_drive:
+        os.rename(source,dest)
+    else:
+        # when output directory is on a different disk than the temp directory we need to use another function
+        # https://python.omics.wiki/file-operations/file-commands/os-rename-vs-shutil-move
+        if os.path.exists(os.path.join(os.path.dirname(dest), os.path.basename(source))):
+            os.remove(os.path.join(os.path.dirname(dest), os.path.basename(source)))
+        shutil.move(source, os.path.dirname(dest))
+        os.rename(os.path.join(os.path.dirname(dest), os.path.basename(source)), dest)
+
+
 def extractLatex(source,dest,debug,bibtex):
 
     #check if destination folder exists else create
@@ -78,7 +94,7 @@ def extractLatex(source,dest,debug,bibtex):
                 # if bibtex option is set also export bibtex file
                 if candidate.endswith(".bib") and bibtex:
                     idStr = filename.split(".")[0] + ".bib"
-                    os.rename(os.path.join(tmpWorkingDir, candidate), os.path.join(dest, idStr))
+                    move_file(os.path.join(tmpWorkingDir, candidate),os.path.join(dest, idStr))
 
             if mainFile == "":
                 print(f"Couldn't find main latex file, skipping {filename}")
@@ -95,8 +111,7 @@ def extractLatex(source,dest,debug,bibtex):
 
             # now move file to output directory
             idStr = filename.split(".")[0] + ".tex"
-            if path.exists(os.path.join(tmpWorkingDir, "outputExpander.tex")) and not path.exists(os.path.join(dest, idStr)) :
-                os.rename(os.path.join(tmpWorkingDir, "outputExpander.tex"), os.path.join(dest, idStr))
+            move_file(os.path.join(tmpWorkingDir, "outputExpander.tex"),os.path.join(dest, idStr))
 
             # source latexpand: https://gitlab.com/latexpand/latexpand/-/blob/master/latexpand
     # remove the working temp directory after being done

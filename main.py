@@ -33,7 +33,7 @@ if __name__ == '__main__':
     # expander options
     expand_parser = cmd_parsers.add_parser("expand", help="expand files")
     expand_parser.add_argument('--in','-i', help='input data directory')
-    expand_parser.add_argument('--bib', default=False, required=False, help='also extract bib resources')
+    expand_parser.add_argument('--bib', default=False, required=False, help='also extract bib resources', action='store_true')
 
     # zip options
     zip_parser = cmd_parsers.add_parser("zip", help="zips to metadata file")
