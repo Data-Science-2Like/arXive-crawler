@@ -77,6 +77,13 @@ def getPaperUrls(startingId = 0) :
 
     return result
 
+def get_paper_info_from_title(title):
+    cur = conn.cursor()
+    cur.execute("SELECT id, title FROM papers WHERE title LIKE '%" + title.replace(".","") + "%'")
+
+    result = cur.fetchall()
+    return result
+
 def getPaperUrlsByCategory(categories,startingId = 0, stopId = 3000000000):
     cur = conn.cursor()
 
