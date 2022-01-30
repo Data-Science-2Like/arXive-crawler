@@ -4,7 +4,7 @@ import tempfile
 import shutil
 import subprocess
 from os import path
-
+from pathlib import Path
 
 def clearFolder(folder):
     # shamelessly copied from https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder
@@ -62,6 +62,9 @@ def move_file(source, dest, override=False):
         shutil.move(source, os.path.dirname(dest))
         os.rename(os.path.join(os.path.dirname(dest), os.path.basename(source)), dest)
 
+def change_ext(source, ext):
+    p = Path(source)
+    p.rename(p.with_suffix(ext))
 
 def extractLatex(source, dest, debug, bibtex, start):
     # check if destination folder exists else create
@@ -123,7 +126,11 @@ def extractLatex(source, dest, debug, bibtex, start):
                 destPath = os.path.join(tmpWorkingDir, "outputExpander.tex")
                 # destStr = f" -o {destPath}"
                 # scriptPath = os.path.join(os.getcwd(), "latexpand.pl")
-                subprocess.call(["perl", "latexpand.pl", mainFile, "-o", destPath])
+                subprocess.call(["perl", "latexpand.pl", mainFile, "-o", destPath],timeout=90)
+            except TimeoutError as e:
+                print("Timeout occured at ", str(idStr))
+                change_ext(filename,".tar.gz.wtf")
+                continue
             except Exception as e:
                 print(e)
 
