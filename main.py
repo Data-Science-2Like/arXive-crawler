@@ -5,6 +5,7 @@ import metaCrawler as meta
 import dataCrawler as data
 import expander as exp
 import jsonExporter as json
+import statstics as stat
 import argparse
 
 import asyncio
@@ -41,6 +42,10 @@ if __name__ == '__main__':
     zip_parser = cmd_parsers.add_parser("zip", help="zips to metadata file")
     zip_parser.add_argument('--name', default="ids.json", required=False, help='The name of the file to which the ids get exported')
 
+    # count options
+    count_parser = cmd_parsers.add_parser("count", help="counts statistics for dataset")
+    count_parser.add_argument('--in', '-i', help='input data directory')
+
 
 
     args = main_parser.parse_args()
@@ -57,5 +62,7 @@ if __name__ == '__main__':
 
     elif "zip" == used_command:
         json.exportDownload(arguments["out"], arguments["name"])
+    elif "count" == used_command:
+        stat.count_ocurrences(arguments["in"])
     else:
         main_parser.print_help()
