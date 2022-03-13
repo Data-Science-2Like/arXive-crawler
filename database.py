@@ -101,5 +101,11 @@ def getPaperUrlsByCategory(categories,startingId = 0, stopId = 3000000000):
 
     return result
 
+def getYearOfPaper(id):
+    cur = conn.cursor()
+    cur.execute('''SELECT strftime('%Y',datetime) FROM papers WHERE id = ?''', (id,))
+    return cur.fetchone()[0]
+
+
 def commit():
     conn.commit()
