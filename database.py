@@ -101,6 +101,22 @@ def getPaperUrlsByCategory(categories,startingId = 0, stopId = 3000000000):
 
     return result
 
+def getPaperCountsPerYearByCateogry(categories):
+    cur = conn.cursor()
+
+    # becase python, we first need to convert all ints to str
+    converted = [str(element) for element in categories]
+
+    categoriesStr = ",".join(converted)
+    cur.execute('''SELECT DISTINCT COUNT(*) , strftime('%Y',datetime) AS year FROM papers
+       INNER JOIN tagged ON papers.id = tagged.paperID
+       WHERE tagged.subjectID IN(''' + categoriesStr + ') GROUP BY year')
+    # we need to add the categories string manually because passing it as a parameter doesn't work somehow
+
+    result = cur.fetchall()
+
+    return result
+
 def getYearOfPaper(id):
     cur = conn.cursor()
     cur.execute('''SELECT strftime('%Y',datetime) FROM papers WHERE id = ?''', (id,))
