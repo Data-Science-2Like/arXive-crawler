@@ -51,5 +51,5 @@ Latexpand is licensed under the BSD License https://opensource.org/licenses/BSD-
 When `--bib` is supplied als the bibliography will be extract out of the LaTeX archives.
 
 ## Known Issues
-- The crawler only reconizes the file types `.pdf`, `.tar.gz` and `.docx`. In very vew cases the downloaded file can also be a single tex file.
+- The crawler only reconizes the file types `.pdf`, `.tar.gz` and `.docx`. In very few cases the downloaded file can also be a single tex file.
 
