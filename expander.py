@@ -5,6 +5,7 @@ import shutil
 import subprocess
 from os import path
 from pathlib import Path
+from tqdm import tqdm
 
 def clearFolder(folder):
     # shamelessly copied from https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder
@@ -17,6 +18,31 @@ def clearFolder(folder):
                 shutil.rmtree(file_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+def fetch_ordered(job_queue, completed):
+    job_queue.sort(key =lambda t : t[1])
+    completed.sort()
+
+    remaining = []
+    idx_jobs = 0
+    idx_c = 0
+    while (idx_jobs < len(job_queue) and idx_c < len(completed)):
+        if job_queue[idx_jobs][1] == completed[idx_c]:
+            idx_jobs += 1
+            idx_c += 1
+            continue
+        if job_queue[idx_jobs][1] > completed[idx_c]:
+            idx_c += 1
+            continue
+        if job_queue[idx_jobs][1] < completed[idx_c]:
+            remaining.append(job_queue[idx_jobs][0])
+            idx_jobs += 1
+            continue
+    while (idx_jobs < len(job_queue)):
+        remaining.append(job_queue[idx_jobs][0])
+        idx_jobs += 1
+
+    return remaining
 
 
 def texFiles(members):
@@ -40,7 +66,7 @@ def check_if_main(file):
                 else:
                     return False
         except UnicodeDecodeError:
-            print('got unicode error with %s , trying different encoding' % e)
+            # print('got unicode error with %s , trying different encoding' % e)
             continue
         else:
             break
@@ -66,7 +92,20 @@ def change_ext(source, ext):
     p = Path(source)
     p.rename(p.with_suffix(ext))
 
+def add_ext(source, ext):
+    p = Path(source)
+    n = Path(str(source) + ext)
+    p.rename(n)
+
+def remove_ext(file: Path) -> str:
+    name = file.name
+    if name.endswith('tar.gz'):
+        return Path(Path(file).stem).stem
+    else:
+        return Path(file).stem
+
 def extractLatex(source, dest, debug, bibtex, start):
+
     # check if destination folder exists else create
     if not path.exists(dest):
         os.mkdir(dest)
@@ -77,24 +116,38 @@ def extractLatex(source, dest, debug, bibtex, start):
     # a working directory
     os.environ["TEXINPUTS"] = tmpWorkingDir
     skipping = False
-    for filename in os.listdir(source):
+
+    all_files = [(f,remove_ext(f)) for f in Path(source).glob('*.tar.gz')]
+    done_files = [remove_ext(f) for f in Path(dest).glob('*.tex')]
+
+    remaining_files = fetch_ordered(all_files, completed=done_files)
+    print(f"Remaining files: {len(remaining_files)}")
+    for filename in tqdm(remaining_files):
+        fullPath = filename
+        filename = filename.name
         if filename.endswith("tar.gz"):
             idStr = filename.split(".")[0]
             if start > int(idStr):
                 if not skipping:
-                    print("Skipping entries")
                     skipping = True
                 continue
             skipping = False
-            print("Started extracting paper ", idStr)
             clearFolder(tmpWorkingDir)
             # print(os.path.join(source, filename))
+            tar = None
             try:
                 tar = tarfile.open(os.path.join(source, filename))
                 # tar.extractall(tmpWorkingDir,members=texFiles(tar))
                 tar.extractall(tmpWorkingDir)
-            except Exception:
+            except Exception as e:
+                if tar is not None:
+                    tar.close()
+                add_ext(fullPath, ".broken")
                 continue
+            finally:
+                if tar is not None:
+                    tar.close()
+                tar = None
 
             # find main file
             mainFile = str()
@@ -115,10 +168,11 @@ def extractLatex(source, dest, debug, bibtex, start):
                     move_file(os.path.join(tmpWorkingDir, candidate), os.path.join(dest, idStr))
 
             if bibtex and not bib_found:
-                print(f"Couldn't find bibliography file for {filename}")
+                #print(f"Couldn't find bibliography file for {filename}")
+                none = 0
 
             if mainFile == "":
-                print(f"Couldn't find main latex file, skipping {filename}")
+                #print(f"Couldn't find main latex file, skipping {filename}")
                 continue
             try:
                 # nome execute the perl script
@@ -126,13 +180,16 @@ def extractLatex(source, dest, debug, bibtex, start):
                 destPath = os.path.join(tmpWorkingDir, "outputExpander.tex")
                 # destStr = f" -o {destPath}"
                 # scriptPath = os.path.join(os.getcwd(), "latexpand.pl")
-                subprocess.call(["perl", "latexpand.pl", mainFile, "-o", destPath],timeout=90)
+                subprocess.call(["perl", "latexpand.pl", mainFile, "-o", destPath],timeout=90, shell=False)
             except TimeoutError as e:
                 print("Timeout occured at ", str(idStr))
-                change_ext(filename,".tar.gz.wtf")
+                add_ext(fullPath,".wtf")
                 continue
             except Exception as e:
+                print("Error occured at ", str(idStr))
                 print(e)
+                add_ext(fullPath, ".wtf")
+                continue
 
             # now move file to output directory
             idStr = filename.split(".")[0] + ".tex"
@@ -141,3 +198,7 @@ def extractLatex(source, dest, debug, bibtex, start):
             # source latexpand: https://gitlab.com/latexpand/latexpand/-/blob/master/latexpand
     # remove the working temp directory after being done
     shutil.rmtree(tmpWorkingDir)
+
+    #with open('damaged_files.txt', 'w') as f:
+    #    for item in damaged_files:
+    #        f.write("%s\n" % item)

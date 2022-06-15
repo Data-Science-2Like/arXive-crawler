@@ -77,6 +77,16 @@ def getPaperUrls(startingId = 0) :
 
     return result
 
+def getPaperWithYears(startingId = 0) :
+
+    cur = conn.cursor()
+    cur.execute('''SELECT id, strftime('%Y',datetime) AS year FROM papers WHERE id >= ?''', (startingId,))
+
+    result = cur.fetchall()
+
+    return result
+
+
 def get_paper_info_from_title(title):
     cur = conn.cursor()
     cur.execute("SELECT id, title FROM papers WHERE title LIKE '%" + title.replace(".","") + "%'")

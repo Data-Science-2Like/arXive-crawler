@@ -187,7 +187,9 @@ def checkSignature(buffer):
         return '.docx'
     elif pdfSig == buffer:
         return '.pdf'
+
     else:
+        return '.test'
         raise ValueError("Unknown File Signature")
 
 
